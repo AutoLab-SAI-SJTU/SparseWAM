@@ -1,0 +1,80 @@
+_target_: navsim.agents.sparsewam_action.sparsewam_action_agent.SparseWAMActionAgent
+
+lr: 1.0e-4
+weight_decay: 1.0e-6
+adam_betas: [0.95, 0.999]
+warmup_steps: 500
+lr_min_ratio: 0.0
+scheduler_total_steps: 0
+use_ema: true
+ema_schedule: fixed
+ema_decay: 0.9999
+ema_inv_gamma: 1.0
+ema_power: 0.75
+ema_max_value: 0.9999
+ema_update_after_step: 0
+
+checkpoint_path: null
+drivor_backbone_ckpt: null
+# Action-only: no scene RF loss. Keep λ_action constant (no Beta / curriculum).
+action_weight: 1.0
+
+eval_pdm: false
+eval_pdm_every_n_epochs: 5
+metric_cache_path: null
+
+config:
+  # No future visual supervision (action-only ablation).
+  future_frame_offsets: []
+  history_frame_offsets: [-3, -2, -1]
+  num_history_frames: 4
+  fuse_history: true
+  history_fusion_num_heads: 4
+  history_fusion_mlp_ratio: 4.0
+  history_fusion_dropout: 0.0
+
+  num_scene_tokens: 16
+  num_poses: 8
+  ego_status_dim: 8
+
+  tf_d_model: 256
+  tf_d_ffn: 1024
+
+  dit_dim: 512
+  dit_depth: 5
+  dit_num_heads: 8
+  dit_mlp_ratio: 4.0
+  dit_dropout: 0.0
+  time_freq_dim: 256
+
+  traj_use_sine_embed: true
+  traj_sine_dim: 64
+  traj_sine_encode_heading: true
+
+  num_train_timesteps: 1000
+  num_inference_steps: 10
+  flow_shift: 1.0
+
+  # History + current only (no future GT frames).
+  camera_order: [cam_f0]
+  cam_f0: [0, 1, 2, 3]
+  cam_l0: []
+  cam_l1: []
+  cam_l2: []
+  cam_r0: []
+  cam_r1: []
+  cam_r2: []
+  cam_b0: []
+  lidar_pc: []
+
+  image_size: [1148, 672]
+
+  image_backbone:
+    model_name: timm/vit_small_patch14_reg4_dinov2.lvd142m
+    model_weights: weights/vit_small_patch14_reg4_dinov2.lvd142m/model.safetensors
+    use_lora: true
+    finetune: false
+    lora_rank: 32
+    use_feature_pooling: false
+    focus_front_cam: false
+    compress_fc: false

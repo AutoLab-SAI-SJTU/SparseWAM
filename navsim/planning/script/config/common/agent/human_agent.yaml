@@ -1,0 +1,6 @@
+_target_: navsim.agents.human_agent.HumanAgent
+
+trajectory_sampling:
+  _target_: nuplan.planning.simulation.trajectory.trajectory_sampling.TrajectorySampling
+  time_horizon: 4
+  interval_length: 0.5
