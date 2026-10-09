@@ -1,0 +1,163 @@
+# MoT DinoDiT. Architecture lives under `config:`.
+# Final defaults = v3_a1 (video_flow_shift=3, action_flow_shift=1, hist=4).
+# scripts/training/train_dinodit.sh and scripts/evaluation/eval_navsim_v1.sh do not repeat these
+# fields. Change the recipe here, not in the shell.
+_target_: navsim.agents.dino_dit.dino_dit_agent.DinoDiTAgent
+
+lr: 1.0e-4
+# Diffusion Policy AdamW defaults.
+weight_decay: 1.0e-6
+adam_betas: [0.95, 0.999]
+# Linear warmup then cosine anneal to lr * lr_min_ratio.
+# Cosine horizon comes from trainer.estimated_stepping_batches unless set.
+warmup_steps: 500
+lr_min_ratio: 0.0
+scheduler_total_steps: 0
+# EMA: default fixed decay (common practice). Set ema_schedule=adaptive for DP power-law.
+use_ema: true
+ema_schedule: fixed
+ema_decay: 0.9999
+ema_inv_gamma: 1.0
+ema_power: 0.75
+ema_max_value: 0.9999
+ema_update_after_step: 0
+
+checkpoint_path: null
+# DrivoR Lightning ckpt used to initialize + freeze DINO register/backbone.
+drivor_backbone_ckpt: null
+# Frozen DrivoR Scorer ckpt for eval (64 RF proposals → neural score → argmax).
+# Train leaves this null; eval script sets it when DINODIT_USE_SCORER=1.
+drivor_scorer_ckpt: null
+scene_weight: 1.0
+# λ_action: first half of training keeps 1.0, then linear ramp to 2.0.
+action_weight: 1.0
+action_weight_schedule: half_then_linear
+action_weight_end: 2.0
+action_weight_ramp_start_ratio: 0.5
+
+# Closed-loop PDMS during validation (needs metric cache).
+# When true, runs multi-step RF infer + PDM score every N epochs (epoch % N == 0).
+# With training ``val_on_test=true``, use the navtest metric_cache (same as
+# scripts/evaluation/run_dino_dit_nav1_eval.sh), not train_metric_cache.
+eval_pdm: false
+eval_pdm_every_n_epochs: 5
+# null → agent falls back to $NAVSIM_EXP_ROOT/train_metric_cache
+# For navtest val: set to $NAVSIM_EXP_ROOT/metric_cache (DLC script does this).
+metric_cache_path: null
+
+config:
+  # Configurable future supervision offsets in frames (NAVSIM = 2Hz).
+  # Examples: [4, 8] → +2s,+4s ; [2, 4, 6, 8] → +1s..+4s
+  # Require scene_filter.num_future_frames >= max(future_frame_offsets).
+  future_frame_offsets: [4, 8]
+  # History DINO condition offsets (2Hz). Packed with current as clean H
+  # tokens in the MoT video sequence (shared 1D frame-time RoPE).
+  # Default [-2] → -1.0s. Require num_history_frames >= 1 + max(|offsets|).
+  history_frame_offsets: [-2]
+  # Absolute history window length used for SensorConfig index math.
+  # current_idx=3; hist -2 → abs 1. Matches navtrain/navtest SceneFilter=4.
+  num_history_frames: 4
+  # History+current are MoT video tokens, not a fused temporal module.
+  fuse_history: false
+
+  num_scene_tokens: 16
+  # DriveVA-aligned: one action token per future pose.
+  num_poses: 8
+  # ego_status = [vx, vy, ax, ay, cmd0..cmd3] → AdaLN condition (not a token).
+  ego_status_dim: 8
+
+  # DrivoR neck / scene-token space (keep 256 to load frozen backbone).
+  tf_d_model: 256
+  tf_d_ffn: 1024
+
+  # Positions: shared 1D RoPE on 2Hz frame time; slot is fixed sinusoidal PE.
+  # Joint D_attn = dit_num_heads * dit_attn_head_dim (must match both experts).
+  # AdaLN uses a low-rank bottleneck Linear(D, r) → Linear(r, 6D); r=0 is full.
+  # Heads 12×64 = 768 joint width so QKV/O reclaim the AdaLN budget.
+  # ~27M transformer params (video 512-d + action 256-d, 5 layers).
+  dit_dim: 512
+  action_dit_dim: 256
+  dit_depth: 5
+  dit_num_heads: 12
+  dit_attn_head_dim: 64
+  dit_mlp_ratio: 4.0
+  dit_dropout: 0.0
+  time_freq_dim: 256
+  adaln_rank: 64
+
+  # TrajectoryEncoder = DiffusionDrive sine embed on z-scored relative RF state.
+  # No denorm: keep encoder input on the same ~N(0,I) scale as the RF prior.
+  traj_use_sine_embed: true
+  traj_sine_dim: 64
+  traj_sine_encode_heading: true
+
+  # Rectified Flow (DriveVA-style FlowMatchScheduler)
+  num_train_timesteps: 1000
+  num_inference_steps: 10
+  # Per-branch SNR shift. Same grid index u, σ = s·u / (1+(s-1)·u).
+  # Frozen to v3_a1 (navtest PDMS 0.891): F noisier than A at the same u.
+  flow_shift: 1.0
+  video_flow_shift: 3.0
+  action_flow_shift: 1.0
+  # Per-timestep action loss_weight: beta | uniform.
+  # beta=Beta(1.5,1) on σ → larger weight at high noise (early denoising).
+  flow_loss_weight_mode: beta
+  flow_beta_alpha: 1.5
+  flow_beta_beta: 1.0
+
+  # Eval-only neural Scorer (DrivoR pos_embed + decoder + 6 PDMS heads).
+  # Train stays 1 RF sample. Eval: DINODIT_USE_SCORER=1 → num_proposals RF samples.
+  # Scorer KV is current-frame 4-cam DINO from the DrivoR ckpt (not planner H).
+  use_drivor_scorer: false
+  num_proposals: 1
+  # DiffusionDriveV2 mul-noise: each RF traj → 1 original + C copies at σ.
+  # Eval 8 RF × (1+7) @ 0.1 → 64 Scorer candidates. 0 copies = RF-only.
+  proposal_mul_noise_copies: 0
+  proposal_mul_noise_std: 0.1
+  # Must match DrivoR enabled-cam order: f0, b0, l0, r0 → scene_embeds [1,4,16,384].
+  scorer_camera_order: [cam_f0, cam_b0, cam_l0, cam_r0]
+  # Max expanded RF batch = original B × chunk. Eval B=4, chunk=32 → 8 modes/step.
+  proposal_chunk_size: 32
+  proposal_num: 64
+  scorer_ref_num: 4
+  refiner_num_heads: 1
+  refiner_ls_values: 0.0
+  noc: 1.0
+  dac: 1.0
+  ddc: 0.0
+  ttc: 5.0
+  ep: 5.0
+  comfort: 2.0
+  b2d: false
+  double_score: false
+  agent_pred: false
+  area_pred: false
+  bev_map: false
+  bev_agent: false
+  one_token_per_traj: true
+
+  # Single-camera (front only). Absolute ids in [history|future]:
+  #   history=4 → current=3; hist -2 → 1; future [4,8] → 7,11.
+  camera_order: [cam_f0]
+  cam_f0: [1, 3, 7, 11]
+  cam_l0: []
+  cam_l1: []
+  cam_l2: []
+  cam_r0: []
+  cam_r1: []
+  cam_r2: []
+  cam_b0: []
+  lidar_pc: []
+
+  # Match DrivoR image size so pretrained backbone pos_embed / LoRA load cleanly.
+  image_size: [1148, 672]  # [W, H]
+
+  image_backbone:
+    model_name: timm/vit_small_patch14_reg4_dinov2.lvd142m
+    model_weights: weights/vit_small_patch14_reg4_dinov2.lvd142m/model.safetensors
+    use_lora: true
+    finetune: false
+    lora_rank: 32
+    use_feature_pooling: false
+    focus_front_cam: false
+    compress_fc: false

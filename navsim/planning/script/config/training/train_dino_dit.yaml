@@ -1,0 +1,68 @@
+# DinoDiT MoT pretraining recipe (v3_a1).
+# Model hyperparameters live in common/agent/dino_dit.yaml.
+# scripts/training/train_dinodit.sh only passes the frozen DrivoR checkpoint, experiment
+# name, GPU count, and the per-GPU batch that keeps global_batch constant.
+hydra:
+  run:
+    dir: ${output_dir}
+  output_subdir: ${output_dir}/code/hydra
+  searchpath:
+    - pkg://navsim.planning.script.config.common
+  job:
+    chdir: False
+
+defaults:
+  - default_common
+  - default_evaluation
+  - default_train_val_test_log_split
+  - agent: dino_dit
+  - _self_
+
+split: trainval
+# Online frames, including future CAM_F0. Do not reuse an old feature cache.
+cache_path: null
+use_cache_without_dataset: false
+force_cache_computation: false
+experiment_name: training_dino_dit_mot_v3_a1_50epochs
+seed: 2
+validation_run: false
+val_on_test: false
+val_navsim_log_path: null
+val_sensor_blobs_path: null
+val_num_history_frames: null
+# Per-GPU batch = global_batch / (NNODES * GPUS_PER_NODE). Paper run: 32.
+global_batch: 32
+
+dataloader:
+  params:
+    batch_size: 32
+    num_workers: 8
+    pin_memory: true
+    prefetch_factor: 2
+
+trainer:
+  params:
+    max_epochs: 50
+    check_val_every_n_epoch: 1
+    val_check_interval: 1.0
+    limit_train_batches: 1.0
+    limit_val_batches: 1.0
+    accelerator: gpu
+    strategy: ddp
+    precision: 16-mixed
+    num_nodes: 1
+    num_sanity_val_steps: 0
+    fast_dev_run: false
+    accumulate_grad_batches: 1
+    gradient_clip_val: 0.0
+    gradient_clip_algorithm: norm
+    default_root_dir: ${output_dir}
+
+train_ckpt_path: null
+skip_ckpt_auto_resume: false
+
+# Cluster training scored val PDMS every 5 epochs. A missing
+# ${NAVSIM_EXP_ROOT}/train_metric_cache only skips that score; the loss is unchanged.
+agent:
+  eval_pdm: true
+  eval_pdm_every_n_epochs: 5
