@@ -1,6 +1,6 @@
 # DinoDiT MoT pretraining recipe (v3_a1).
 # Model hyperparameters live in common/agent/dino_dit.yaml.
-# scripts/training/train_dinodit.sh only passes the frozen DrivoR checkpoint, experiment
+# scripts/training/train_sparsewam.sh only passes the frozen DrivoR checkpoint, experiment
 # name, GPU count, and the per-GPU batch that keeps global_batch constant.
 hydra:
   run:

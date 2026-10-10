@@ -1,6 +1,6 @@
 # MoT DinoDiT. Architecture lives under `config:`.
 # Final defaults = v3_a1 (video_flow_shift=3, action_flow_shift=1, hist=4).
-# scripts/training/train_dinodit.sh and scripts/evaluation/eval_navsim_v1.sh do not repeat these
+# scripts/training/train_sparsewam.sh and scripts/evaluation/eval_navsim_v1.sh do not repeat these
 # fields. Change the recipe here, not in the shell.
 _target_: navsim.agents.dino_dit.dino_dit_agent.DinoDiTAgent
 

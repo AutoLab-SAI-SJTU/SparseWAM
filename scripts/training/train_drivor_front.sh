@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Front-only DrivoR pretraining.
+# Requires ${NAVSIM_EXP_ROOT}/train_metric_cache from run_train_metric_caching.sh.
 #   GPUS_PER_NODE=8 bash scripts/training/train_drivor_front.sh
 # Extra Hydra args are appended as-is.
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Training-time PDMS cache -> ${NAVSIM_EXP_ROOT}/train_metric_cache
+# Build this before scripts/training/train_drivor_front.sh.
 #   bash scripts/training/run_train_metric_caching.sh
 
 set -euo pipefail

@@ -10,7 +10,7 @@ Optional adaptive (Diffusion Policy power-law)::
 
 Implemented with ``torch.optim.swa_utils.AveragedModel`` + a plain Lightning
 ``Callback``. Does **not** import ``pytorch_lightning.callbacks.weight_averaging``
-(that module only exists in newer PL, e.g. 2.5+/2.6; this stack uses 2.2.1).
+(that module only exists in newer PL, e.g. 2.5+/2.6; this stack uses 2.4.0).
 
 Behavior:
   * update shadow weights after each optimizer step;

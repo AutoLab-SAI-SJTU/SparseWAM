@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# DinoDiT pretraining. First argument is the frozen DrivoR checkpoint.
-#   GPUS_PER_NODE=8 bash scripts/training/train_dinodit.sh /path/to/drivor.ckpt
+# SparseWAM pretraining. First argument is the frozen DrivoR checkpoint.
+#   GPUS_PER_NODE=8 bash scripts/training/train_sparsewam.sh /path/to/drivor.ckpt
 
 set -euo pipefail
 source "$(dirname "$0")/../env.sh"

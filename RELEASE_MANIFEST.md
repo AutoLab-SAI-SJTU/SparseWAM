@@ -65,7 +65,7 @@
 | `scripts/viz/` | 未移动 | |
 | `scripts/env.sh` | 新写 | 见下方改动 6 |
 | `scripts/training/train_drivor_front.sh` | 新写 | 见下方改动 6 |
-| `scripts/training/train_dinodit.sh` | 新写 | 见下方改动 6 |
+| `scripts/training/train_sparsewam.sh` | 新写 | 见下方改动 6 |
 | `scripts/evaluation/eval_navsim_v1.sh` | 新写 | 见下方改动 6 |
 | `tutorial/` | 未移动 | |
 | `.git/` | 未移动 | |
@@ -106,7 +106,7 @@
 6. 新写四个脚本，不再写 `cam_f0`、head 数、flow shift
    - `scripts/env.sh`：导出四个路径，并带上 `PYTHONPATH`
    - `scripts/training/train_drivor_front.sh`：`torchrun`，只传实验名、GPU 数、按 `global_batch` 算出的 per-GPU batch
-   - `scripts/training/train_dinodit.sh`：同上，另外传入 DrivoR backbone checkpoint
+   - `scripts/training/train_sparsewam.sh`：同上，另外传入 DrivoR backbone checkpoint
    - `scripts/evaluation/eval_navsim_v1.sh`：只传 checkpoint、实验名、GPU 数
    - 后来又收掉了目录检查、checkpoint 存在性检查和 batch 整除报错
 11. 保留两个 metric cache 脚本，只把环境从 `env_setup.sh` 换成 `scripts/env.sh`
@@ -114,11 +114,11 @@
    - `scripts/evaluation/run_metric_caching.sh` → `${NAVSIM_EXP_ROOT}/metric_cache`
 7. `docs/dino_dit.md`
    - 删掉潮汐 / DLC 启动说明和 `env_setup_tidal.sh`
-   - 改成 `scripts/training/train_dinodit.sh`
+   - 改成 `scripts/training/train_sparsewam.sh`
 8. `docs/dino_dit_mot.md`
    - 表里 `history_frame_offsets` 从 `[-3]` 改为 `[-2]`
    - 表里 head 从 `8×64=512` 改为 `12×64=768`
-   - 启动命令改成 `scripts/training/train_dinodit.sh` 和 `scripts/evaluation/eval_navsim_v1.sh`
+   - 启动命令改成 `scripts/training/train_sparsewam.sh` 和 `scripts/evaluation/eval_navsim_v1.sh`
    - 文件表里的潮汐 shell、smoke、可视化脚本改成上面两个入口
 9. `navsim/agents/dino_dit/layers/ema.py`
    - 注释里的 “tidal env is 2.2.1” 改成 “this stack uses 2.2.1”。逻辑没改。
