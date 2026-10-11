@@ -262,14 +262,21 @@ bash scripts/evaluation/run_metric_caching.sh
 
 The cache is stored at `$NAVSIM_EXP_ROOT/metric_cache`.
 
-Score a SparseWAM checkpoint with:
+Score a SparseWAM checkpoint with one trajectory:
 
 ```bash
 source scripts/env.sh
 GPUS_PER_NODE=8 bash scripts/evaluation/eval_navsim_v1.sh /path/to/sparsewam.ckpt
 ```
 
-PDMS is written under `$NAVSIM_EXP_ROOT`. This evaluation uses one trajectory sample.
+Rank 8 trajectories, each with 7 noise copies, using a frozen front-camera DrivoR Scorer:
+
+```bash
+source scripts/env.sh
+GPUS_PER_NODE=8 bash scripts/evaluation/eval_navsim_v1.sh /path/to/sparsewam.ckpt /path/to/drivor.ckpt
+```
+
+PDMS is written under `$NAVSIM_EXP_ROOT`. The sampling, noise, and batch settings for both protocols are inside `scripts/evaluation/eval_navsim_v1.sh`.
 
 ## Acknowledgments
 

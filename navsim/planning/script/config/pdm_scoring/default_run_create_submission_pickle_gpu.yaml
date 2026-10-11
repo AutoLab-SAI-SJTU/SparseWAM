@@ -15,8 +15,8 @@ defaults:
   - _self_
   - override train_test_split: navtest
 
-"team_name": VAI # The team name
-"authors": DynamoTeam  # The team members
-"email": ellingtonkirby31@gmail.com # email of the corresponding team member
-"institution": VAI # affiliation of the team
-"country": France  # country or region of the team, e.g. China
+"team_name": ??? # The team name
+"authors": ??? # The team members
+"email": ??? # email of the corresponding team member
+"institution": ??? # affiliation of the team
+"country": ??? # country or region of the team, e.g. China

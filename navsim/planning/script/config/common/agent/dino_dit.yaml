@@ -106,8 +106,9 @@ config:
   flow_beta_beta: 1.0
 
   # Eval-only neural Scorer (DrivoR pos_embed + decoder + 6 PDMS heads).
-  # Train stays 1 RF sample. Eval: DINODIT_USE_SCORER=1 → num_proposals RF samples.
-  # Scorer KV is current-frame 4-cam DINO from the DrivoR ckpt (not planner H).
+  # Train stays 1 RF sample. Passing a Scorer ckpt to
+  # scripts/evaluation/eval_navsim_v1.sh switches on 8 RF samples x (1+7) noise.
+  # Scorer KV is current-frame DINO from the DrivoR ckpt (not planner H).
   use_drivor_scorer: false
   num_proposals: 1
   # DiffusionDriveV2 mul-noise: each RF traj → 1 original + C copies at σ.

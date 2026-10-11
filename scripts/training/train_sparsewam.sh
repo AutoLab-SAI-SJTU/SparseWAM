@@ -29,7 +29,7 @@ exec torchrun \
     "${NAVSIM_DEVKIT_ROOT}/navsim/planning/script/run_training_full.py" \
     --config-name=train_dino_dit \
     "experiment_name=${EXPERIMENT}" \
-    "agent.drivor_backbone_ckpt=${CKPT}" \
+    "agent.drivor_backbone_ckpt=\"${CKPT}\"" \
     "++trainer.params.devices=${GPUS_PER_NODE}" \
     "trainer.params.num_nodes=${NNODES}" \
     "dataloader.params.batch_size=${PER_GPU_BATCH}" \

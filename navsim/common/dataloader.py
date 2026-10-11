@@ -278,7 +278,7 @@ class MetricCacheLoader:
                 return raw_path
 
             # Metadata CSVs store absolute paths from the machine that created
-            # the cache, e.g. /cpfs/.../train_metric_cache/log/type/token/file.
+            # the cache, e.g. /data/train_metric_cache/log/type/token/file.
             # After moving the cache bundle, preserve the subtree under the
             # cache directory name and attach it to the runtime cache_path.
             if cache_path.name in raw_path.parts:
