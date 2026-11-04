@@ -6,6 +6,7 @@
 
 <p align="center">
   <a href="https://arxiv.org/abs/2611.00044"><img src="https://img.shields.io/badge/arXiv-2611.00044-b31b1b?logo=arxiv&logoColor=white" alt="arXiv"></a>
+  <a href="https://autolab-sai-sjtu.github.io/SparseWAM/"><img src="https://img.shields.io/badge/Project-Page-1a6ca3" alt="Project Page"></a>
   <a href="https://github.com/AutoLab-SAI-SJTU/SparseWAM"><img src="https://img.shields.io/badge/Code-GitHub-181717?logo=github&logoColor=white" alt="Code"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="License"></a>
 </p>
@@ -36,6 +37,7 @@ This repository provides the official implementation of **SparseWAM** for the pa
 
 ## News
 
+- **`November 4th, 2026`:** [Project page](https://autolab-sai-sjtu.github.io/SparseWAM/) is online.
 - **`October 9th, 2026`:** NavSim v1 training and evaluation code released.
 
 ## Table of Contents
