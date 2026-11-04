@@ -208,7 +208,22 @@ huggingface-cli download timm/vit_small_patch14_reg4_dinov2.lvd142m model.safete
 
 The file must be `weights/vit_small_patch14_reg4_dinov2.lvd142m/model.safetensors`.
 
-<!-- TODO: public DrivoR and SparseWAM checkpoints, and the command to download them. -->
+Download the NavSim v1 checkpoints from the [v1.0 release](https://github.com/AutoLab-SAI-SJTU/SparseWAM/releases/tag/v1.0):
+
+```bash
+mkdir -p checkpoints
+gh release download v1.0 --repo AutoLab-SAI-SJTU/SparseWAM --dir checkpoints
+```
+
+`checkpoints/drivor_front_ep24.ckpt` is the front-camera DrivoR image encoder and Scorer. The trajectory planner is not included. SparseWAM training reads only the encoder. The Scorer evaluation reads the encoder and the scoring heads.
+
+`checkpoints/sparsewam_front_ep49.ckpt` is the 50-epoch SparseWAM checkpoint used for the NavSim v1 numbers above.
+
+```bash
+GPUS_PER_NODE=8 bash scripts/training/train_sparsewam.sh checkpoints/drivor_front_ep24.ckpt
+GPUS_PER_NODE=8 bash scripts/evaluation/eval_navsim_v1.sh checkpoints/sparsewam_front_ep49.ckpt
+GPUS_PER_NODE=8 bash scripts/evaluation/eval_navsim_v1.sh checkpoints/sparsewam_front_ep49.ckpt checkpoints/drivor_front_ep24.ckpt
+```
 
 ## Training
 
